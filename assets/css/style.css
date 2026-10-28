@@ -74,6 +74,8 @@ body {
     color: var(--text-main);
     line-height: 1.6;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -268,6 +270,7 @@ a:hover {
     max-width: 1240px;
     margin: 0 auto;
     padding: 48px 24px;
+    width: 100%;
 }
 
 .section-header {
@@ -554,6 +557,12 @@ a:hover {
     background: #e0e7ff;
     color: #4338ca;
     border: 1px solid #c7d2fe;
+}
+
+.badge-light {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
 }
 
 /* ============================================================
@@ -1053,6 +1062,249 @@ textarea.form-control {
 .alert-close:hover { opacity: 1; }
 
 /* ============================================================
+   PUBLIC FOOTER (Sleek Dark Cyber-Navy Theme)
+============================================================ */
+
+.public-footer {
+    background: #090d16;
+    color: #94a3b8;
+    border-top: 1px solid #1e293b;
+    margin-top: auto;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.public-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), rgba(236, 72, 153, 0.5), transparent);
+}
+
+.footer-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 56px 24px 36px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.2fr;
+    gap: 48px;
+}
+
+.footer-brand h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+}
+
+.footer-brand h3 i {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 24px;
+    filter: drop-shadow(0 2px 8px rgba(79, 70, 229, 0.4));
+}
+
+.footer-brand p {
+    color: #94a3b8;
+    line-height: 1.7;
+    font-size: 14px;
+    max-width: 480px;
+    margin: 0;
+}
+
+.footer-col h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 18px;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 28px;
+    height: 2px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-full);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-links li a {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-links li a:hover {
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.footer-bottom {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 22px 24px;
+    border-top: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* ============================================================
+   EMPTY STATE COMPONENT
+============================================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+    margin: 24px 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.empty-state-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 420px;
+    margin: 0 auto 16px;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   AUTHENTICATION PORTAL (Login Layout)
+============================================================ */
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%, #020617 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    max-width: 440px;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.auth-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-glow);
+}
+
+.auth-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.auth-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   TOOLBAR & SEARCH CONTROLS
+============================================================ */
+
+.toolbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
    RESPONSIVE DESIGN
 ============================================================ */
 
@@ -1065,5 +1317,21 @@ textarea.form-control {
     }
     .hero-title {
         font-size: 38px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 40px 20px 24px;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    .auth-card {
+        padding: 28px 20px;
     }
 }
