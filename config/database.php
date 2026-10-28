@@ -6,15 +6,15 @@
  */
 
 // 1. Detect Database Credentials from Environment Variables (Railway / Cloud) or fallback to Local 127.0.0.1 (XAMPP)
-$dbHost = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-$dbPort = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306';
-$dbName = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'event_management_db';
-$dbUser = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
-$dbPass = getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+$dbHost = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
+$dbPort = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: getenv('DB_PORT') ?: '3306';
+$dbName = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: 'event_management_db';
+$dbUser = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: 'root';
+$dbPass = getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('MYSQL_PASSWORD') !== false ? getenv('MYSQL_PASSWORD') : (getenv('DB_PASS') !== false ? getenv('DB_PASS') : ''));
 $dbCharset = 'utf8mb4';
 
-// Check if a single connection URL is provided (DATABASE_URL or MYSQL_URL)
-$dbUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
+// Check if a single connection URL is provided (DATABASE_URL, MYSQL_URL, or Railway Private/Public URLs)
+$dbUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL') ?: getenv('MYSQL_PRIVATE_URL') ?: getenv('MYSQL_PUBLIC_URL');
 if ($dbUrl) {
     $parsedUrl = parse_url($dbUrl);
     if (!empty($parsedUrl['host'])) {
@@ -83,8 +83,8 @@ try {
             $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             unset($tempPdo);
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } elseif (DB_HOST === '127.0.0.1' && empty(getenv('MYSQLHOST')) && empty(getenv('DATABASE_URL'))) {
-            // Local fallback attempt: try 'localhost' if 127.0.0.1 socket gave refusal
+        } elseif (DB_HOST === '127.0.0.1' && empty(getenv('MYSQLHOST')) && empty(getenv('DATABASE_URL')) && empty(getenv('MYSQL_URL'))) {
+            // Local fallback attempt: try 'localhost' if 127.0.0.1 socket gave refusal on Windows
             $localDsn = "mysql:host=localhost;port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
             $pdo = new PDO($localDsn, DB_USER, DB_PASS, $options);
         } else {
@@ -110,7 +110,7 @@ try {
     }
 
 } catch (Throwable $e) {
-    $isCloud = getenv('RAILWAY_ENVIRONMENT') || getenv('MYSQLHOST') || getenv('DATABASE_URL');
+    $isCloud = getenv('RAILWAY_ENVIRONMENT') || getenv('MYSQLHOST') || getenv('DATABASE_URL') || getenv('MYSQL_URL');
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -136,11 +136,13 @@ try {
             <div class="err"><strong>Error:</strong> <?= htmlspecialchars($e->getMessage()) ?></div>
 
             <?php if ($isCloud): ?>
-                <h3>Steps to connect MySQL in Railway:</h3>
+                <h3>Steps to connect MySQL in Railway (Takes 1 Minute):</h3>
                 <ol>
                     <li>In your Railway Project Dashboard, click the <strong>+</strong> (Add) button.</li>
                     <li>Select <strong>Database</strong> &rarr; <strong>Add MySQL</strong>.</li>
-                    <li>Railway will generate the database and EventHub will automatically connect and seed all tables!</li>
+                    <li>Click on the <strong>event_manager</strong> service &rarr; open <strong>Variables</strong> tab.</li>
+                    <li>Click <strong>New Variable</strong> &rarr; <strong>Add Reference</strong> &rarr; select <code>DATABASE_URL</code> from <code>MySQL</code>.</li>
+                    <li>Railway will restart and EventHub will automatically connect and create all tables!</li>
                 </ol>
             <?php else: ?>
                 <h3>Quick 2-Minute Setup Steps for XAMPP:</h3>
