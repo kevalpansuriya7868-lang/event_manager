@@ -2,10 +2,11 @@
 /**
  * Database Configuration & Connection
  * Event Management System
+ * Supports both Local (127.0.0.1 / localhost) and Global Cloud (Railway / Environment Variables)
  */
 
-// 1. Detect Database Credentials from Environment Variables (Railway / Cloud) or fallback to XAMPP defaults
-$dbHost = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
+// 1. Detect Database Credentials from Environment Variables (Railway / Cloud) or fallback to Local 127.0.0.1 (XAMPP)
+$dbHost = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
 $dbPort = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306';
 $dbName = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'event_management_db';
 $dbUser = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
@@ -61,25 +62,44 @@ if (preg_match('#^(.*?/event-management)#i', $scriptDir, $matches)) {
 }
 define('BASE_URL', rtrim($baseUrl, '/'));
 
-// 3. Establish PDO Database Connection
+// 3. Establish PDO Database Connection with Automatic Fallback & Auto-Seeding
+$pdo = null;
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => true,
+    PDO::ATTR_TIMEOUT            => 5,
+];
+
 try {
     $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => true,
-        PDO::ATTR_TIMEOUT            => 5,
-    ];
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    try {
+        $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    } catch (PDOException $e) {
+        // If database does not exist yet (code 1049: Unknown database), try to auto-create it
+        if ($e->getCode() == 1049 || stripos($e->getMessage(), 'Unknown database') !== false) {
+            $rootDsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
+            $tempPdo = new PDO($rootDsn, DB_USER, DB_PASS, $options);
+            $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            unset($tempPdo);
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        } elseif (DB_HOST === '127.0.0.1' && empty(getenv('MYSQLHOST')) && empty(getenv('DATABASE_URL'))) {
+            // Local fallback attempt: try 'localhost' if 127.0.0.1 socket gave refusal
+            $localDsn = "mysql:host=localhost;port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+            $pdo = new PDO($localDsn, DB_USER, DB_PASS, $options);
+        } else {
+            throw $e;
+        }
+    }
 
-    // Auto-seed schema and initial records if tables don't exist yet (automatic setup on Railway)
+    // Auto-seed schema and initial sample records if tables don't exist yet (works automatically both on Local & Railway)
     try {
         $checkStmt = $pdo->query("SHOW TABLES LIKE 'event'");
         if ($checkStmt && !$checkStmt->fetch()) {
             $sqlFile = __DIR__ . '/../database/event_management.sql';
             if (file_exists($sqlFile)) {
                 $sqlContent = file_get_contents($sqlFile);
-                // Strip CREATE DATABASE and USE statements so it executes directly in the active connected database
+                // Strip raw CREATE DATABASE and USE statements so queries run inside the active connected database
                 $sqlContent = preg_replace('/^\s*CREATE\s+DATABASE.*?;/mi', '', $sqlContent);
                 $sqlContent = preg_replace('/^\s*USE\s+.*?;/mi', '', $sqlContent);
                 $pdo->exec($sqlContent);
@@ -88,6 +108,7 @@ try {
     } catch (Throwable $seedError) {
         // Non-fatal, let application proceed
     }
+
 } catch (Throwable $e) {
     $isCloud = getenv('RAILWAY_ENVIRONMENT') || getenv('MYSQLHOST') || getenv('DATABASE_URL');
     ?>
@@ -125,7 +146,7 @@ try {
                 <h3>Quick 2-Minute Setup Steps for XAMPP:</h3>
                 <ol>
                     <li>Open your <strong>XAMPP Control Panel</strong> and click <strong>Start</strong> on both <strong>Apache</strong> and <strong>MySQL</strong>.</li>
-                    <li>Open your browser and navigate to <a href="http://localhost/phpmyadmin" target="_blank" style="color: #60a5fa;">http://localhost/phpmyadmin</a>.</li>
+                    <li>Open your browser and navigate to <a href="http://localhost:8080/phpmyadmin" target="_blank" style="color: #60a5fa;">http://localhost:8080/phpmyadmin</a> (or <a href="http://localhost/phpmyadmin" target="_blank" style="color: #60a5fa;">http://localhost/phpmyadmin</a>).</li>
                     <li>Click on the <strong>Import</strong> tab at the top.</li>
                     <li>Click <strong>Choose File</strong> and select <code>database/event_management.sql</code> from this project folder.</li>
                     <li>Scroll down and click <strong>Import</strong> / <strong>Go</strong>.</li>
