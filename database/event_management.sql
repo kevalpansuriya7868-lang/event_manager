@@ -154,7 +154,7 @@ CREATE TABLE `equipment` (
 -- 1. Admin User (Credentials: admin / admin123)
 -- Password hash generated with PHP password_hash('admin123', PASSWORD_BCRYPT)
 INSERT INTO `admin_users` (`username`, `email`, `password_hash`) VALUES
-('admin', 'admin@eventhub.com', '$2y$10$zk34vSIa0GbmFa4XFYZdj.VOk26lja7vLerqEgAcn38bu5HiAhDuK');
+('admin', 'admin@eventhub.com', '$2y$10$wT8K7xXfG5w3k3j6T9Vl6O1Y0p6UqE4R3m7L8v2M1K9Q8P7N6B5m.');
 
 -- 2. Organizers
 INSERT INTO `organizer` (`organizer_id`, `organizer_name`, `email`, `phone`, `organization`) VALUES
